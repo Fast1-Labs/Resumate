@@ -5,12 +5,12 @@ import { ScreenContent } from '~/components/ScreenContent';
 
 export default function Home() {
   return (
-    <>
-      <Stack.Screen options={{ title: 'Tab Two' }} />
+    <View>
+      <Stack.Screen options={{ title: 'My Resumes' }} />
       <View style={styles.container}>
         <ScreenContent path="app/(tabs)/two.tsx" title="Tab Two" />
       </View>
-    </>
+    </View>
   );
 }
 
