@@ -1,23 +1,17 @@
-import { SignedIn, SignedOut, useUser } from '@clerk/clerk-expo';
-import { Link } from 'expo-router';
+import { useUser } from '@clerk/clerk-expo';
+import { Redirect } from 'expo-router';
 import { Text, View } from 'react-native';
 
 export default function Page() {
-  const { user } = useUser();
+  const { isSignedIn } = useUser();
+
+  if (!isSignedIn) {
+    return <Redirect href="/(auth)/sign-in" />;
+  }
 
   return (
-    <View className="flex-1">
-      <SignedIn>
-        <Text>Hello {user?.emailAddresses[0].emailAddress}</Text>
-      </SignedIn>
-      <SignedOut>
-        <Link href="/(auth)/sign-in">
-          <Text>Sign in</Text>
-        </Link>
-        <Link href="/(auth)/sign-up">
-          <Text>Sign up</Text>
-        </Link>
-      </SignedOut>
+    <View className="flex-1 items-center justify-center">
+      <Text>Hello</Text>
     </View>
   );
 }
