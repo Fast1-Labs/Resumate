@@ -1,4 +1,5 @@
-import { useSignIn } from '@clerk/clerk-expo';
+import { useSignIn, useOAuth } from '@clerk/clerk-expo';
+import { FontAwesome } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
 import React from 'react';
 import { Text, TextInput, Pressable, View } from 'react-native';
@@ -6,37 +7,41 @@ import { Text, TextInput, Pressable, View } from 'react-native';
 export default function Page() {
   const { signIn, setActive, isLoaded } = useSignIn();
   const router = useRouter();
-
+  const { startOAuthFlow: googleAuth } = useOAuth({ strategy: 'oauth_google' });
   const [emailAddress, setEmailAddress] = React.useState('');
   const [password, setPassword] = React.useState('');
 
-  // Handle the submission of the sign-in form
   const onSignInPress = React.useCallback(async () => {
     if (!isLoaded) return;
 
-    // Start the sign-in process using the email and password provided
     try {
       const signInAttempt = await signIn.create({
         identifier: emailAddress,
         password,
       });
 
-      // If sign-in process is complete, set the created session as active
-      // and redirect the user
       if (signInAttempt.status === 'complete') {
         await setActive({ session: signInAttempt.createdSessionId });
         router.replace('/');
       } else {
-        // If the status isn't complete, check why. User might need to
-        // complete further steps.
         console.error(JSON.stringify(signInAttempt, null, 2));
       }
     } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
       console.error(JSON.stringify(err, null, 2));
     }
   }, [isLoaded, emailAddress, password]);
+
+  const onGoogleSignInPress = React.useCallback(async () => {
+    try {
+      const { createdSessionId, setActive } = await googleAuth();
+
+      if (!createdSessionId) {
+        setActive!({ session: createdSessionId });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
 
   return (
     <View className="flex-1 justify-center bg-gray-100 p-8">
@@ -74,7 +79,13 @@ export default function Page() {
           />
         </View>
       </View>
-
+      {/* Google sign in */}
+      <Pressable
+        onPress={onGoogleSignInPress}
+        className="mt-8 flex-row items-center justify-center gap-4 rounded-lg border py-2">
+        <Text className="font-lg font-bold">Sign in with Google</Text>
+        <FontAwesome name="google" size={20} color="black" />
+      </Pressable>
       {/* Sign-in Button */}
       <Pressable onPress={onSignInPress} className="mt-8 rounded-lg bg-blue-600 py-4">
         <Text className="text-center text-lg font-medium text-white">Sign In</Text>
